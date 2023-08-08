@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Data Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .chart {
+            width: 32%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Data Visualization</h1>
+    <div class="chart-container">
+        <div id="light-chart" class="chart"></div>
+        <div id="humidity-chart" class="chart"></div>
+        <div id="temperature-chart" class="chart"></div>
+    </div>
+    <script>
+        function updateChart() {
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    let timeData = data.time_data;
+                    let lightData = data.light_data;
+                    let humidityData = data.humidity_data;
+                    let tempData = data.temp_data;
+
+                    let lightTrace = {
+                        x: timeData,
+                        y: lightData,
+                        mode: 'lines',
+                        name: 'Light Level'
+                    };
+
+                    let humidityTrace = {
+                        x: timeData,
+                        y: humidityData,
+                        mode: 'lines',
+                        name: 'Humidity'
+                    };
+
+                    let temperatureTrace = {
+                        x: timeData,
+                        y: tempData,
+                        mode: 'lines',
+                        name: 'Temperature'
+                    };
+
+                    let layout = {
+                        xaxis: { title: 'Time (s)' }
+                    };
+
+                    let config = {responsive: true};
+
+                    Plotly.newPlot('light-chart', [lightTrace], {...layout, yaxis: { title: 'Light Level' }}, config);
+                    Plotly.newPlot('humidity-chart', [humidityTrace], {...layout, yaxis: { title: 'Humidity' }}, config);
+                    Plotly.newPlot('temperature-chart', [temperatureTrace], {...layout, yaxis: { title: 'Temperature' }}, config);
+                })
+                .catch(error => console.error(error));
+        }
+
+        updateChart();  // Initial chart rendering
+        setInterval(updateChart, 1000);  // Update chart every second
+    </script>
+</body>
+</html>
